@@ -16,6 +16,7 @@
 		AA4AF5082906A53900236B5C /* ListMoviesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4AF5072906A53900236B5C /* ListMoviesViewController.swift */; };
 		AA4AF50B2906B4B100236B5C /* MovieTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4AF50A2906B4B100236B5C /* MovieTableViewCell.swift */; };
 		AA4AF50D2906C66D00236B5C /* CurrentMovieViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4AF50C2906C66D00236B5C /* CurrentMovieViewController.swift */; };
+		AA4AF5102906D1FB00236B5C /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4AF50F2906D1FB00236B5C /* Movie.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,6 +44,7 @@
 		AA4AF5072906A53900236B5C /* ListMoviesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListMoviesViewController.swift; sourceTree = "<group>"; };
 		AA4AF50A2906B4B100236B5C /* MovieTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieTableViewCell.swift; sourceTree = "<group>"; };
 		AA4AF50C2906C66D00236B5C /* CurrentMovieViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMovieViewController.swift; sourceTree = "<group>"; };
+		AA4AF50F2906D1FB00236B5C /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +77,7 @@
 		AA4AF4EC2906938B00236B5C /* MovieFirst */ = {
 			isa = PBXGroup;
 			children = (
+				AA4AF50E2906D19B00236B5C /* Models */,
 				AA4AF5092906B49300236B5C /* Views */,
 				AA4AF5042906A43500236B5C /* Controllers */,
 				AA4AF4ED2906938B00236B5C /* AppDelegate.swift */,
@@ -103,6 +106,14 @@
 				AA4AF50A2906B4B100236B5C /* MovieTableViewCell.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		AA4AF50E2906D19B00236B5C /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA4AF50F2906D1FB00236B5C /* Movie.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -218,6 +229,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA4AF5102906D1FB00236B5C /* Movie.swift in Sources */,
 				AA4AF50D2906C66D00236B5C /* CurrentMovieViewController.swift in Sources */,
 				AA4AF4F22906938B00236B5C /* ViewController.swift in Sources */,
 				AA4AF4EE2906938B00236B5C /* AppDelegate.swift in Sources */,

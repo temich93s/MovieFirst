@@ -9,6 +9,9 @@ final class ListMoviesViewController: UIViewController {
     // MARK: - Constants
 
     private enum Constants {
+        static let keyText = "8216e974d625f2a458a739c20007dcd6"
+        static let topRatedURLText =
+            "https://api.themoviedb.org/3/movie/top_rated?api_key=8216e974d625f2a458a739c20007dcd6"
         static let moviesText = "Movies"
         static let popularText = "Popular"
         static let topRatedText = "Top Rated"
@@ -57,6 +60,10 @@ final class ListMoviesViewController: UIViewController {
         return tableView
     }()
 
+    // MARK: - Private Properties
+
+    var results: [Result]? = []
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -70,6 +77,7 @@ final class ListMoviesViewController: UIViewController {
         view.backgroundColor = .orange
         title = Constants.moviesText
 
+        fetchData()
         listMoviesTableView.delegate = self
         listMoviesTableView.dataSource = self
         addSubview()
@@ -88,6 +96,33 @@ final class ListMoviesViewController: UIViewController {
         createTopRatedButtonConstraint()
         createUpComingButtonConstraint()
         createListMoviesTableViewConstraint()
+    }
+
+    private func fetchData() {
+        if let url = URL(string: Constants.topRatedURLText) {
+            let session = URLSession(configuration: .default)
+            let task = session.dataTask(with: url) { data, _, error in
+                if error == nil {
+                    self.decodeData(data: data)
+                } else {
+                    print(error ?? "")
+                }
+            }
+            task.resume()
+        }
+    }
+
+    func decodeData(data: Data?) {
+        let decoder = JSONDecoder()
+        if let safeData = data {
+            do {
+                let decodedData = try decoder.decode(Movie.self, from: safeData)
+                results = decodedData.results
+                print(results ?? "")
+            } catch {
+                print(error)
+            }
+        }
     }
 
     private func createPopularButtonConstraint() {
