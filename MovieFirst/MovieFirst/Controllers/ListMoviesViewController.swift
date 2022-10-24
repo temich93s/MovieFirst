@@ -151,4 +151,9 @@ extension ListMoviesViewController: UITableViewDelegate, UITableViewDataSource {
         )
         return cell
     }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let currentMovieViewController = CurrentMovieViewController()
+        navigationController?.pushViewController(currentMovieViewController, animated: true)
+    }
 }

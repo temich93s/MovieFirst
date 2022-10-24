@@ -15,6 +15,7 @@
 		AA4AF4FA2906938D00236B5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA4AF4F82906938D00236B5C /* LaunchScreen.storyboard */; };
 		AA4AF5082906A53900236B5C /* ListMoviesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4AF5072906A53900236B5C /* ListMoviesViewController.swift */; };
 		AA4AF50B2906B4B100236B5C /* MovieTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4AF50A2906B4B100236B5C /* MovieTableViewCell.swift */; };
+		AA4AF50D2906C66D00236B5C /* CurrentMovieViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4AF50C2906C66D00236B5C /* CurrentMovieViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +42,7 @@
 		AA4AF4FB2906938D00236B5C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA4AF5072906A53900236B5C /* ListMoviesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListMoviesViewController.swift; sourceTree = "<group>"; };
 		AA4AF50A2906B4B100236B5C /* MovieTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieTableViewCell.swift; sourceTree = "<group>"; };
+		AA4AF50C2906C66D00236B5C /* CurrentMovieViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMovieViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				AA4AF5072906A53900236B5C /* ListMoviesViewController.swift */,
+				AA4AF50C2906C66D00236B5C /* CurrentMovieViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -215,6 +218,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA4AF50D2906C66D00236B5C /* CurrentMovieViewController.swift in Sources */,
 				AA4AF4F22906938B00236B5C /* ViewController.swift in Sources */,
 				AA4AF4EE2906938B00236B5C /* AppDelegate.swift in Sources */,
 				AA4AF4F02906938B00236B5C /* SceneDelegate.swift in Sources */,
