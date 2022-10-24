@@ -14,6 +14,11 @@ final class ListMoviesViewController: UIViewController {
         static let topRatedText = "Top Rated"
         static let upComingText = "Up Coming"
         static let movieTableViewCellText = "MovieTableViewCell"
+        static let defaultImageMovieNameText = "Lightwire - Over Powered"
+        static let defaultNameMovieText = "Lightwire - Over Powered"
+        static let defaultDescriptionMovieText = "Хороший фильм"
+        static let defaultDateMovieText = "23.05.2022"
+        static let defaultScoreMovieText = "7.7"
     }
 
     // MARK: - Private Visual Properties
@@ -137,7 +142,13 @@ extension ListMoviesViewController: UITableViewDelegate, UITableViewDataSource {
         guard let cell = tableView
             .dequeueReusableCell(withIdentifier: Constants.movieTableViewCellText) as? MovieTableViewCell
         else { return UITableViewCell() }
-        cell.textLabel?.text = "\(indexPath)"
+        cell.configureMovieTableViewCell(
+            imageMovieName: Constants.defaultImageMovieNameText,
+            nameMovie: Constants.defaultNameMovieText,
+            descriptionMovie: Constants.defaultDescriptionMovieText,
+            dateMovie: Constants.defaultDateMovieText,
+            scoreMovie: Constants.defaultScoreMovieText
+        )
         return cell
     }
 }
