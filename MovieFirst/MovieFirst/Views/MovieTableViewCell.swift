@@ -132,7 +132,8 @@ final class MovieTableViewCell: UITableViewCell {
             imageMovieImageView.topAnchor.constraint(equalTo: topAnchor),
             imageMovieImageView.leftAnchor.constraint(equalTo: leftAnchor),
             imageMovieImageView.widthAnchor.constraint(equalToConstant: 150),
-            imageMovieImageView.heightAnchor.constraint(equalToConstant: 200)
+            imageMovieImageView.heightAnchor.constraint(equalToConstant: 200),
+            imageMovieImageView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
 }
