@@ -49,7 +49,7 @@ final class MovieTableViewCell: UITableViewCell {
         let imageView = UIImageView()
         return imageView
     }()
-    
+
     // MARK: - Initializers
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

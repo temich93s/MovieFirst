@@ -6,6 +6,14 @@ import UIKit
 // MARK: - Экран со списком фильмов
 
 final class ListMoviesViewController: UIViewController {
+    // MARK: - Enum
+
+    enum CurrentCategoryMovies {
+        case topRated
+        case popular
+        case upcoming
+    }
+
     // MARK: - Constants
 
     private enum Constants {
@@ -70,9 +78,12 @@ final class ListMoviesViewController: UIViewController {
         return tableView
     }()
 
+    private let refreshControl = UIRefreshControl()
+
     // MARK: - Private Properties
 
-    var movies: [Movie]? = []
+    private var movies: [Movie]? = []
+    private var currentCategoryMovies: CurrentCategoryMovies = .popular
 
     // MARK: - Lifecycle
 
@@ -84,24 +95,37 @@ final class ListMoviesViewController: UIViewController {
     // MARK: - Private Methods
 
     @objc private func popularButtonAction() {
-        listMoviesTableView.reloadData()
         mainActivityIndicatorView.startAnimating()
         mainActivityIndicatorView.isHidden = false
+        currentCategoryMovies = .popular
         fetchData(categoryMovies: Constants.popularQueryText)
     }
 
     @objc private func topRatedButtonAction() {
-        listMoviesTableView.reloadData()
         mainActivityIndicatorView.startAnimating()
         mainActivityIndicatorView.isHidden = false
+        currentCategoryMovies = .topRated
         fetchData(categoryMovies: Constants.topRatedQueryText)
     }
 
     @objc private func upComingButtonAction() {
-        listMoviesTableView.reloadData()
         mainActivityIndicatorView.startAnimating()
         mainActivityIndicatorView.isHidden = false
+        currentCategoryMovies = .upcoming
         fetchData(categoryMovies: Constants.upcomingQueryText)
+    }
+
+    @objc private func refreshAction() {
+        print(currentCategoryMovies)
+        switch currentCategoryMovies {
+        case .popular:
+            fetchData(categoryMovies: Constants.popularQueryText)
+        case .topRated:
+            fetchData(categoryMovies: Constants.topRatedQueryText)
+        case .upcoming:
+            fetchData(categoryMovies: Constants.upcomingQueryText)
+        }
+        refreshControl.endRefreshing()
     }
 
     private func setupView() {
@@ -109,8 +133,10 @@ final class ListMoviesViewController: UIViewController {
         fetchData(categoryMovies: Constants.popularQueryText)
         listMoviesTableView.delegate = self
         listMoviesTableView.dataSource = self
+        listMoviesTableView.addSubview(refreshControl)
         addSubview()
         setupConstraint()
+        setupRefreshControl()
     }
 
     private func addSubview() {
@@ -119,6 +145,11 @@ final class ListMoviesViewController: UIViewController {
         view.addSubview(upComingButton)
         view.addSubview(listMoviesTableView)
         view.addSubview(mainActivityIndicatorView)
+    }
+
+    private func setupRefreshControl() {
+        refreshControl.addTarget(self, action: #selector(refreshAction), for: .valueChanged)
+        refreshControl.tintColor = UIColor.systemPink
     }
 
     private func setupConstraint() {
