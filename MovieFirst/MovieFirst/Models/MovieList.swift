@@ -5,7 +5,11 @@ import Foundation
 
 // MARK: - Movie
 
-/// MovieList
+/// MovieList: список фильмов
+/// - page: номер страницы с набором фильмов
+/// - results: массив с фильмами
+/// - totalPages: общее количество страниц
+/// - totalResults: общее количество фильмов
 struct MovieList: Codable {
     let page: Int
     let results: [Movie]
@@ -22,20 +26,27 @@ struct MovieList: Codable {
 
 // MARK: - Movie
 
-/// Movie
+/// Movie: информация о фильме
+/// - dataImage: сам постер фильма
+/// - id: идентификатор фильма
+/// - overview: краткое описание фильма
+/// - posterPath: ссылка на постер фильма
+/// - releaseDate: дата релиза фильма
+/// - title: наименование фильма
+/// - voteAverage: оценка фильма
 struct Movie: Codable {
+    var dataImage: Data?
     let id: Int
     let overview: String
-    let popularity: Double
     let posterPath: String
     let releaseDate: String
     let title: String
     let voteAverage: Double
 
     enum CodingKeys: String, CodingKey {
+        case dataImage
         case id
         case overview
-        case popularity
         case posterPath = "poster_path"
         case releaseDate = "release_date"
         case title

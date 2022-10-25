@@ -14,47 +14,59 @@ final class ListMoviesViewController: UIViewController {
         static let pageQueryText = "&page=1"
         static let regionQueryText = "&region=ru"
         static let topRatedQueryText = "top_rated?"
+        static let popularQueryText = "popular?"
+        static let upcomingQueryText = "upcoming?"
         static let themoviedbQueryText = "https://api.themoviedb.org/3/movie/"
+        static let posterPathQueryText = "https://image.tmdb.org/t/p/w500"
         static let moviesText = "Movies"
         static let popularText = "Popular"
         static let topRatedText = "Top Rated"
         static let upComingText = "Up Coming"
         static let movieTableViewCellText = "MovieTableViewCell"
-        static let defaultImageMovieNameText = "Lightwire - Over Powered"
-        static let defaultNameMovieText = "Lightwire - Over Powered"
-        static let defaultDescriptionMovieText = "Хороший фильм"
-        static let defaultDateMovieText = "23.05.2022"
-        static let defaultScoreMovieText = "7.7"
     }
 
     // MARK: - Private Visual Properties
 
-    private var popularButton: UIButton = {
+    private lazy var popularButton: UIButton = {
         let button = UIButton()
         button.setTitle(Constants.popularText, for: .normal)
-        button.backgroundColor = .blue
+        button.backgroundColor = .systemPink
+        button.layer.cornerRadius = 15
+        button.addTarget(self, action: #selector(popularButtonAction), for: .touchUpInside)
         return button
     }()
 
-    private var topRatedButton: UIButton = {
+    private lazy var topRatedButton: UIButton = {
         let button = UIButton()
         button.setTitle(Constants.topRatedText, for: .normal)
-        button.backgroundColor = .blue
+        button.backgroundColor = .systemPink
+        button.layer.cornerRadius = 15
+        button.addTarget(self, action: #selector(topRatedButtonAction), for: .touchUpInside)
         return button
     }()
 
-    private var upComingButton: UIButton = {
+    private lazy var upComingButton: UIButton = {
         let button = UIButton()
         button.setTitle(Constants.upComingText, for: .normal)
-        button.backgroundColor = .blue
+        button.backgroundColor = .systemPink
+        button.layer.cornerRadius = 15
+        button.addTarget(self, action: #selector(upComingButtonAction), for: .touchUpInside)
         return button
     }()
 
-    private var listMoviesTableView: UITableView = {
+    private let mainActivityIndicatorView: UIActivityIndicatorView = {
+        let activity = UIActivityIndicatorView()
+        activity.color = .systemPink
+        activity.startAnimating()
+        return activity
+    }()
+
+    private let listMoviesTableView: UITableView = {
         let tableView = UITableView()
         tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: Constants.movieTableViewCellText)
         tableView.showsVerticalScrollIndicator = false
-        tableView.backgroundColor = .blue
+        tableView.layer.cornerRadius = 15
+        tableView.separatorStyle = .none
         return tableView
     }()
 
@@ -71,11 +83,30 @@ final class ListMoviesViewController: UIViewController {
 
     // MARK: - Private Methods
 
-    private func setupView() {
-        view.backgroundColor = .orange
-        title = Constants.moviesText
+    @objc private func popularButtonAction() {
+        listMoviesTableView.reloadData()
+        mainActivityIndicatorView.startAnimating()
+        mainActivityIndicatorView.isHidden = false
+        fetchData(categoryMovies: Constants.popularQueryText)
+    }
 
-        fetchData()
+    @objc private func topRatedButtonAction() {
+        listMoviesTableView.reloadData()
+        mainActivityIndicatorView.startAnimating()
+        mainActivityIndicatorView.isHidden = false
+        fetchData(categoryMovies: Constants.topRatedQueryText)
+    }
+
+    @objc private func upComingButtonAction() {
+        listMoviesTableView.reloadData()
+        mainActivityIndicatorView.startAnimating()
+        mainActivityIndicatorView.isHidden = false
+        fetchData(categoryMovies: Constants.upcomingQueryText)
+    }
+
+    private func setupView() {
+        title = Constants.moviesText
+        fetchData(categoryMovies: Constants.popularQueryText)
         listMoviesTableView.delegate = self
         listMoviesTableView.dataSource = self
         addSubview()
@@ -87,6 +118,7 @@ final class ListMoviesViewController: UIViewController {
         view.addSubview(topRatedButton)
         view.addSubview(upComingButton)
         view.addSubview(listMoviesTableView)
+        view.addSubview(mainActivityIndicatorView)
     }
 
     private func setupConstraint() {
@@ -94,10 +126,11 @@ final class ListMoviesViewController: UIViewController {
         createTopRatedButtonConstraint()
         createUpComingButtonConstraint()
         createListMoviesTableViewConstraint()
+        createMainActivityIndicatorViewConstraint()
     }
 
-    private func fetchData() {
-        let urlString = Constants.themoviedbQueryText + Constants.topRatedQueryText + Constants
+    private func fetchData(categoryMovies: String) {
+        let urlString = Constants.themoviedbQueryText + categoryMovies + Constants
             .apiKeyQueryText + Constants.languageQueryText + Constants.pageQueryText + Constants.pageQueryText
         if let url = URL(string: urlString) {
             let session = URLSession(configuration: .default)
@@ -105,7 +138,10 @@ final class ListMoviesViewController: UIViewController {
                 guard let self = self else { return }
                 if error == nil {
                     self.decodeData(data: data)
+                    self.getDataImageFromURLImage()
                     DispatchQueue.main.async {
+                        self.mainActivityIndicatorView.stopAnimating()
+                        self.mainActivityIndicatorView.isHidden = true
                         self.listMoviesTableView.reloadData()
                     }
                 } else {
@@ -125,6 +161,17 @@ final class ListMoviesViewController: UIViewController {
             } catch {
                 print(error)
             }
+        }
+    }
+
+    func getDataImageFromURLImage() {
+        guard let safeMovies = movies else { return }
+        for index in 0 ..< safeMovies.count {
+            guard
+                let imageMovieNameURL =
+                URL(string: "\(Constants.posterPathQueryText)" + "\(safeMovies[index].posterPath)")
+            else { continue }
+            movies?[index].dataImage = try? Data(contentsOf: imageMovieNameURL)
         }
     }
 
@@ -167,6 +214,14 @@ final class ListMoviesViewController: UIViewController {
             listMoviesTableView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor)
         ])
     }
+
+    private func createMainActivityIndicatorViewConstraint() {
+        mainActivityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            mainActivityIndicatorView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, constant: -30),
+            mainActivityIndicatorView.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor)
+        ])
+    }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
@@ -183,7 +238,7 @@ extension ListMoviesViewController: UITableViewDelegate, UITableViewDataSource {
             let safeMovies = movies
         else { return UITableViewCell() }
         cell.configureMovieTableViewCell(
-            imageMovieName: safeMovies[indexPath.row].posterPath,
+            dataImage: safeMovies[indexPath.row].dataImage,
             nameMovie: safeMovies[indexPath.row].title,
             descriptionMovie: safeMovies[indexPath.row].overview,
             dateMovie: safeMovies[indexPath.row].releaseDate,

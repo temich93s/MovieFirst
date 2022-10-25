@@ -8,45 +8,54 @@ import UIKit
 final class MovieTableViewCell: UITableViewCell {
     // MARK: - Private Visual Properties
 
-    private var nameMovieLabel: UILabel = {
+    private let nameMovieLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 2
         label.textAlignment = .center
-        label.backgroundColor = .green
+        label.font = UIFont.boldSystemFont(ofSize: 17)
+        label.textColor = .white
+        label.backgroundColor = .systemPink
         return label
     }()
 
-    private var descriptionMovieLabel: UILabel = {
+    private let descriptionMovieLabel: UILabel = {
         let label = UILabel()
-        label.numberOfLines = 6
+        label.numberOfLines = 7
+        label.textAlignment = .center
+        label.backgroundColor = .lightGray
+        label.font = UIFont.systemFont(ofSize: 15)
+        return label
+    }()
+
+    private let dateMovieLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .right
+        label.font = UIFont.boldSystemFont(ofSize: 17)
+        return label
+    }()
+
+    private let scoreMovieLabel: UILabel = {
+        let label = UILabel()
         label.textAlignment = .center
         label.backgroundColor = .white
+        label.layer.cornerRadius = 10
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 2
+        label.layer.borderColor = UIColor.systemPink.cgColor
         return label
     }()
 
-    private var dateMovieLabel: UILabel = {
-        let label = UILabel()
-        label.backgroundColor = .brown
-        return label
-    }()
-
-    private var scoreMovieLabel: UILabel = {
-        let label = UILabel()
-        label.backgroundColor = .cyan
-        return label
-    }()
-
-    private var imageMovieImageView: UIImageView = {
+    private let imageMovieImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.backgroundColor = .yellow
         return imageView
     }()
-
+    
     // MARK: - Initializers
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = .black
+        backgroundColor = .lightGray
+        selectionStyle = .none
         addSubview()
         setupConstraint()
     }
@@ -59,28 +68,27 @@ final class MovieTableViewCell: UITableViewCell {
     // MARK: - Public Methods
 
     func configureMovieTableViewCell(
-        imageMovieName: String?,
+        dataImage: Data?,
         nameMovie: String?,
         descriptionMovie: String?,
         dateMovie: String?,
         scoreMovie: String?
     ) {
-        if let safeImageMovieName = imageMovieName {
-            imageMovieImageView.image = UIImage(named: safeImageMovieName)
-        }
         nameMovieLabel.text = nameMovie
         descriptionMovieLabel.text = descriptionMovie
         dateMovieLabel.text = dateMovie
         scoreMovieLabel.text = scoreMovie
+        guard let safeDataImage = dataImage else { return }
+        imageMovieImageView.image = UIImage(data: safeDataImage)
     }
 
     // MARK: - Private Methods
 
     private func addSubview() {
-        addSubview(imageMovieImageView)
         addSubview(nameMovieLabel)
         addSubview(descriptionMovieLabel)
         addSubview(dateMovieLabel)
+        addSubview(imageMovieImageView)
         addSubview(scoreMovieLabel)
     }
 
@@ -106,8 +114,8 @@ final class MovieTableViewCell: UITableViewCell {
         descriptionMovieLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             descriptionMovieLabel.topAnchor.constraint(equalTo: nameMovieLabel.bottomAnchor),
-            descriptionMovieLabel.leftAnchor.constraint(equalTo: imageMovieImageView.rightAnchor),
-            descriptionMovieLabel.rightAnchor.constraint(equalTo: rightAnchor),
+            descriptionMovieLabel.leftAnchor.constraint(equalTo: imageMovieImageView.rightAnchor, constant: 5),
+            descriptionMovieLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -5),
             descriptionMovieLabel.bottomAnchor.constraint(equalTo: dateMovieLabel.topAnchor)
         ])
     }
@@ -115,8 +123,8 @@ final class MovieTableViewCell: UITableViewCell {
     private func createDateMovieLabelConstraint() {
         dateMovieLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            dateMovieLabel.leftAnchor.constraint(equalTo: imageMovieImageView.rightAnchor),
-            dateMovieLabel.rightAnchor.constraint(equalTo: rightAnchor),
+            dateMovieLabel.leftAnchor.constraint(equalTo: imageMovieImageView.rightAnchor, constant: 5),
+            dateMovieLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -5),
             dateMovieLabel.bottomAnchor.constraint(equalTo: bottomAnchor),
             dateMovieLabel.heightAnchor.constraint(equalToConstant: 30)
         ])
@@ -125,10 +133,10 @@ final class MovieTableViewCell: UITableViewCell {
     private func createScoreMovieLabelConstraint() {
         scoreMovieLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            scoreMovieLabel.bottomAnchor.constraint(equalTo: imageMovieImageView.bottomAnchor, constant: -10),
-            scoreMovieLabel.rightAnchor.constraint(equalTo: imageMovieImageView.rightAnchor, constant: -10),
-            scoreMovieLabel.widthAnchor.constraint(equalToConstant: 50),
-            scoreMovieLabel.heightAnchor.constraint(equalToConstant: 30),
+            scoreMovieLabel.topAnchor.constraint(equalTo: imageMovieImageView.topAnchor, constant: 8),
+            scoreMovieLabel.rightAnchor.constraint(equalTo: imageMovieImageView.rightAnchor, constant: -8),
+            scoreMovieLabel.widthAnchor.constraint(equalToConstant: 29),
+            scoreMovieLabel.heightAnchor.constraint(equalToConstant: 29),
         ])
     }
 
