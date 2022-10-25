@@ -9,9 +9,12 @@ final class ListMoviesViewController: UIViewController {
     // MARK: - Constants
 
     private enum Constants {
-        static let keyText = "8216e974d625f2a458a739c20007dcd6"
-        static let topRatedURLText =
-            "https://api.themoviedb.org/3/movie/top_rated?api_key=8216e974d625f2a458a739c20007dcd6"
+        static let apiKeyQueryText = "api_key=8216e974d625f2a458a739c20007dcd6"
+        static let languageQueryText = "&language=ru-RU"
+        static let pageQueryText = "&page=1"
+        static let regionQueryText = "&region=ru"
+        static let topRatedQueryText = "top_rated?"
+        static let themoviedbQueryText = "https://api.themoviedb.org/3/movie/"
         static let moviesText = "Movies"
         static let popularText = "Popular"
         static let topRatedText = "Top Rated"
@@ -50,19 +53,14 @@ final class ListMoviesViewController: UIViewController {
     private var listMoviesTableView: UITableView = {
         let tableView = UITableView()
         tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: Constants.movieTableViewCellText)
+        tableView.showsVerticalScrollIndicator = false
         tableView.backgroundColor = .blue
-        return tableView
-    }()
-
-    private var movieTableViewCell: UITableViewCell = {
-        let tableView = UITableViewCell()
-        tableView.backgroundColor = .green
         return tableView
     }()
 
     // MARK: - Private Properties
 
-    var results: [Result]? = []
+    var movies: [Movie]? = []
 
     // MARK: - Lifecycle
 
@@ -99,11 +97,17 @@ final class ListMoviesViewController: UIViewController {
     }
 
     private func fetchData() {
-        if let url = URL(string: Constants.topRatedURLText) {
+        let urlString = Constants.themoviedbQueryText + Constants.topRatedQueryText + Constants
+            .apiKeyQueryText + Constants.languageQueryText + Constants.pageQueryText + Constants.pageQueryText
+        if let url = URL(string: urlString) {
             let session = URLSession(configuration: .default)
-            let task = session.dataTask(with: url) { data, _, error in
+            let task = session.dataTask(with: url) { [weak self] data, _, error in
+                guard let self = self else { return }
                 if error == nil {
                     self.decodeData(data: data)
+                    DispatchQueue.main.async {
+                        self.listMoviesTableView.reloadData()
+                    }
                 } else {
                     print(error ?? "")
                 }
@@ -116,9 +120,8 @@ final class ListMoviesViewController: UIViewController {
         let decoder = JSONDecoder()
         if let safeData = data {
             do {
-                let decodedData = try decoder.decode(Movie.self, from: safeData)
-                results = decodedData.results
-                print(results ?? "")
+                let decodedData = try decoder.decode(MovieList.self, from: safeData)
+                movies = decodedData.results
             } catch {
                 print(error)
             }
@@ -170,19 +173,21 @@ final class ListMoviesViewController: UIViewController {
 
 extension ListMoviesViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        20
+        movies?.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView
-            .dequeueReusableCell(withIdentifier: Constants.movieTableViewCellText) as? MovieTableViewCell
+        guard
+            let cell = tableView
+            .dequeueReusableCell(withIdentifier: Constants.movieTableViewCellText) as? MovieTableViewCell,
+            let safeMovies = movies
         else { return UITableViewCell() }
         cell.configureMovieTableViewCell(
-            imageMovieName: Constants.defaultImageMovieNameText,
-            nameMovie: Constants.defaultNameMovieText,
-            descriptionMovie: Constants.defaultDescriptionMovieText,
-            dateMovie: Constants.defaultDateMovieText,
-            scoreMovie: Constants.defaultScoreMovieText
+            imageMovieName: safeMovies[indexPath.row].posterPath,
+            nameMovie: safeMovies[indexPath.row].title,
+            descriptionMovie: safeMovies[indexPath.row].overview,
+            dateMovie: safeMovies[indexPath.row].releaseDate,
+            scoreMovie: "\(safeMovies[indexPath.row].voteAverage)"
         )
         return cell
     }

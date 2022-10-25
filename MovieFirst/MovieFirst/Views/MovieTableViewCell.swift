@@ -10,12 +10,16 @@ final class MovieTableViewCell: UITableViewCell {
 
     private var nameMovieLabel: UILabel = {
         let label = UILabel()
+        label.numberOfLines = 2
+        label.textAlignment = .center
         label.backgroundColor = .green
         return label
     }()
 
     private var descriptionMovieLabel: UILabel = {
         let label = UILabel()
+        label.numberOfLines = 6
+        label.textAlignment = .center
         label.backgroundColor = .white
         return label
     }()
@@ -55,13 +59,15 @@ final class MovieTableViewCell: UITableViewCell {
     // MARK: - Public Methods
 
     func configureMovieTableViewCell(
-        imageMovieName: String,
-        nameMovie: String,
-        descriptionMovie: String,
-        dateMovie: String,
-        scoreMovie: String
+        imageMovieName: String?,
+        nameMovie: String?,
+        descriptionMovie: String?,
+        dateMovie: String?,
+        scoreMovie: String?
     ) {
-        imageMovieImageView.image = UIImage(named: imageMovieName)
+        if let safeImageMovieName = imageMovieName {
+            imageMovieImageView.image = UIImage(named: safeImageMovieName)
+        }
         nameMovieLabel.text = nameMovie
         descriptionMovieLabel.text = descriptionMovie
         dateMovieLabel.text = dateMovie
@@ -92,7 +98,7 @@ final class MovieTableViewCell: UITableViewCell {
             nameMovieLabel.topAnchor.constraint(equalTo: topAnchor),
             nameMovieLabel.leftAnchor.constraint(equalTo: imageMovieImageView.rightAnchor),
             nameMovieLabel.rightAnchor.constraint(equalTo: rightAnchor),
-            nameMovieLabel.heightAnchor.constraint(equalToConstant: 50)
+            nameMovieLabel.heightAnchor.constraint(equalToConstant: 45)
         ])
     }
 
