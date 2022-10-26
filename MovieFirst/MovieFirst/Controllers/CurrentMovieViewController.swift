@@ -10,11 +10,15 @@ final class CurrentMovieViewController: UIViewController {
 
     private enum Constants {
         static let overviewText = "Overview"
+        static let firstPartURLText = "https://api.themoviedb.org/3/movie/"
+        static let secondPartURLText = "/similar?api_key=8216e974d625f2a458a739c20007dcd6&language=ru-RU&page=1"
         static let posterPathQueryText = "https://image.tmdb.org/t/p/w500"
         static let systemPinkColorName = "SystemPinkColor"
-        static let releaseDataLabelText = "Дата релиза:"
+        static let releaseDataLabelText = "Релиз:"
         static let voteAverageLabelText = "Оценка:"
         static let voteCountLabelText = "Голоса:"
+        static let similarMovieLabelText = "Похожие фильмы"
+        static let similarMovieCollectionViewCellText = "SimilarMovieCollectionViewCell"
     }
 
     // MARK: - Private Visual Properties
@@ -29,7 +33,7 @@ final class CurrentMovieViewController: UIViewController {
         label.textAlignment = .center
         label.numberOfLines = 0
         label.textColor = UIColor(named: Constants.systemPinkColorName)
-        label.font = UIFont.systemFont(ofSize: 20)
+        label.font = UIFont.boldSystemFont(ofSize: 22)
         return label
     }()
 
@@ -86,6 +90,28 @@ final class CurrentMovieViewController: UIViewController {
         return label
     }()
 
+    private let similarMovieLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.text = Constants.similarMovieLabelText
+        label.font = UIFont.boldSystemFont(ofSize: 22)
+        return label
+    }()
+
+    private let similarMovieCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 0
+        layout.minimumInteritemSpacing = 0
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .gray
+        collectionView.register(
+            SimilarMovieCollectionViewCell.self,
+            forCellWithReuseIdentifier: Constants.similarMovieCollectionViewCellText
+        )
+        return collectionView
+    }()
+
     private let mainScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false
@@ -94,16 +120,25 @@ final class CurrentMovieViewController: UIViewController {
 
     private let contentView = UIView()
 
+    // MARK: - Private Properties
+
+    private var similarMovies: [Result]? = []
+    private var imagePosters: [Data] = []
+    private lazy var heightSimilarMovieCollectionView = similarMovieCollectionView.heightAnchor
+        .constraint(equalToConstant: 0)
+
     // MARK: - Initializers
 
     init(movie: Movie) {
         super.init(nibName: nil, bundle: nil)
         getDataImageFromURLImage(posterPath: movie.posterPath)
+
         titleMovieLabel.text = movie.title
         releaseDataValueLabel.text = movie.releaseDate
         voteAverageValueLabel.text = "\(movie.voteAverage)"
         voteCountValueLabel.text = "\(movie.voteCount)"
         overviewMovieLabel.text = movie.overview
+        fetchSimilarMovies(idMovie: movie.id)
     }
 
     @available(*, unavailable)
@@ -122,6 +157,8 @@ final class CurrentMovieViewController: UIViewController {
 
     private func setupView() {
         title = Constants.overviewText
+        similarMovieCollectionView.delegate = self
+        similarMovieCollectionView.dataSource = self
         navigationController?.navigationBar.tintColor = UIColor(named: Constants.systemPinkColorName)
         addSubview()
         setupConstraint()
@@ -139,6 +176,8 @@ final class CurrentMovieViewController: UIViewController {
         contentView.addSubview(voteCountLabel)
         contentView.addSubview(voteCountValueLabel)
         contentView.addSubview(overviewMovieLabel)
+        contentView.addSubview(similarMovieLabel)
+        contentView.addSubview(similarMovieCollectionView)
     }
 
     private func setupConstraint() {
@@ -151,6 +190,8 @@ final class CurrentMovieViewController: UIViewController {
         createVoteCountLabelConstraint()
         createVoteCountValueLabelConstraint()
         createOverviewMovieLabelConstraint()
+        createSimilarMovieLabelConstraint()
+        createSimilarMovieCollectionViewConstraint()
         createMainScrollViewConstraint()
         createContentViewConstraint()
     }
@@ -163,6 +204,52 @@ final class CurrentMovieViewController: UIViewController {
                 self.imageMovieImageView.image = UIImage(data: data)
             }
         }
+    }
+
+    private func fetchSimilarMovies(idMovie: Int) {
+        let urlString = Constants.firstPartURLText + "\(idMovie)" + Constants
+            .secondPartURLText
+        if let url = URL(string: urlString) {
+            let session = URLSession(configuration: .default)
+            let task = session.dataTask(with: url) { [weak self] data, _, error in
+                guard let self = self else { return }
+                if error == nil {
+                    self.decodeData(data: data)
+                    self.getDataImageFromURLImage()
+                    DispatchQueue.main.async {
+                        self.similarMovieCollectionView.reloadData()
+                    }
+                } else {
+                    print(error ?? "")
+                }
+            }
+            task.resume()
+        }
+    }
+
+    func decodeData(data: Data?) {
+        let decoder = JSONDecoder()
+        if let safeData = data {
+            do {
+                let decodedData = try decoder.decode(SimilarMovies.self, from: safeData)
+                similarMovies = decodedData.results
+            } catch {
+                print(error)
+            }
+        }
+    }
+
+    func getDataImageFromURLImage() {
+        guard let safeSimilarMovies = similarMovies else { return }
+        for index in 0 ..< safeSimilarMovies.count {
+            guard
+                let imageMovieNameURL =
+                URL(string: "\(Constants.posterPathQueryText)" + "\(safeSimilarMovies[index].posterPath)")
+            else { continue }
+            guard let imageData = try? Data(contentsOf: imageMovieNameURL) else { continue }
+            imagePosters.append(imageData)
+        }
+        print(imagePosters)
     }
 
     private func createImageMovieImageViewConstraint() {
@@ -244,7 +331,35 @@ final class CurrentMovieViewController: UIViewController {
             overviewMovieLabel.topAnchor.constraint(equalTo: voteCountLabel.bottomAnchor, constant: 20),
             overviewMovieLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             overviewMovieLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.9),
-            overviewMovieLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
+    }
+
+    private func createSimilarMovieLabelConstraint() {
+        similarMovieLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            similarMovieLabel.topAnchor.constraint(equalTo: overviewMovieLabel.bottomAnchor, constant: 20),
+            similarMovieLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            similarMovieLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.9)
+        ])
+    }
+
+    private func createSimilarMovieCollectionViewConstraint() {
+        similarMovieCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            similarMovieCollectionView.topAnchor.constraint(equalTo: similarMovieLabel.bottomAnchor, constant: 20),
+            similarMovieCollectionView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            similarMovieCollectionView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.9),
+            similarMovieCollectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
+    }
+
+    private func createContentViewConstraint() {
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            contentView.topAnchor.constraint(equalTo: mainScrollView.topAnchor),
+            contentView.leftAnchor.constraint(equalTo: mainScrollView.leftAnchor),
+            contentView.rightAnchor.constraint(equalTo: mainScrollView.rightAnchor),
+            contentView.bottomAnchor.constraint(equalTo: mainScrollView.bottomAnchor)
         ])
     }
 
@@ -257,14 +372,42 @@ final class CurrentMovieViewController: UIViewController {
             mainScrollView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor)
         ])
     }
+}
 
-    private func createContentViewConstraint() {
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: mainScrollView.topAnchor),
-            contentView.leftAnchor.constraint(equalTo: mainScrollView.leftAnchor),
-            contentView.rightAnchor.constraint(equalTo: mainScrollView.rightAnchor),
-            contentView.bottomAnchor.constraint(equalTo: mainScrollView.bottomAnchor)
-        ])
+// MARK: - UICollectionViewDelegateFlowLayout
+
+extension CurrentMovieViewController: UICollectionViewDelegateFlowLayout {}
+
+// MARK: - UICollectionViewDelegate, UICollectionViewDataSource
+
+extension CurrentMovieViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        heightSimilarMovieCollectionView.constant =
+            similarMovieCollectionView.frame.width * 2 / 3 * CGFloat(imagePosters.count / 2)
+        heightSimilarMovieCollectionView.isActive = true
+        return imagePosters.count
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        guard
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: Constants.similarMovieCollectionViewCellText,
+                for: indexPath
+            ) as? SimilarMovieCollectionViewCell,
+            indexPath.row < imagePosters.count
+        else { return UICollectionViewCell() }
+        cell.configureSimilarMovieCollectionViewCell(dataImage: imagePosters[indexPath.row])
+        return cell
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        CGSize(width: (collectionView.frame.width) / 2, height: (collectionView.frame.width) / 1.5)
     }
 }
