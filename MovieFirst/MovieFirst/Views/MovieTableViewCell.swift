@@ -6,6 +6,12 @@ import UIKit
 // MARK: - Ячейка с фильмом
 
 final class MovieTableViewCell: UITableViewCell {
+    // MARK: - Constants
+
+    private enum Constants {
+        static let systemPinkColorName = "SystemPinkColor"
+    }
+
     // MARK: - Private Visual Properties
 
     private let nameMovieLabel: UILabel = {
@@ -14,7 +20,7 @@ final class MovieTableViewCell: UITableViewCell {
         label.textAlignment = .center
         label.font = UIFont.boldSystemFont(ofSize: 17)
         label.textColor = .white
-        label.backgroundColor = .systemPink
+        label.backgroundColor = UIColor(named: Constants.systemPinkColorName)
         return label
     }()
 
@@ -37,11 +43,10 @@ final class MovieTableViewCell: UITableViewCell {
     private let scoreMovieLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.backgroundColor = .white
+        label.textColor = .white
+        label.backgroundColor = UIColor(named: Constants.systemPinkColorName)
         label.layer.cornerRadius = 10
         label.layer.masksToBounds = true
-        label.layer.borderWidth = 2
-        label.layer.borderColor = UIColor.systemPink.cgColor
         return label
     }()
 
@@ -133,10 +138,10 @@ final class MovieTableViewCell: UITableViewCell {
     private func createScoreMovieLabelConstraint() {
         scoreMovieLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            scoreMovieLabel.topAnchor.constraint(equalTo: imageMovieImageView.topAnchor, constant: 8),
-            scoreMovieLabel.rightAnchor.constraint(equalTo: imageMovieImageView.rightAnchor, constant: -8),
-            scoreMovieLabel.widthAnchor.constraint(equalToConstant: 29),
-            scoreMovieLabel.heightAnchor.constraint(equalToConstant: 29),
+            scoreMovieLabel.topAnchor.constraint(equalTo: imageMovieImageView.topAnchor, constant: 6),
+            scoreMovieLabel.leftAnchor.constraint(equalTo: imageMovieImageView.leftAnchor, constant: 6),
+            scoreMovieLabel.widthAnchor.constraint(equalToConstant: 33),
+            scoreMovieLabel.heightAnchor.constraint(equalToConstant: 33),
         ])
     }
 

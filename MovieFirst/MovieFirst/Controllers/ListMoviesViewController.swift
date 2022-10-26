@@ -17,6 +17,7 @@ final class ListMoviesViewController: UIViewController {
     // MARK: - Constants
 
     private enum Constants {
+        static let systemPinkColorName = "SystemPinkColor"
         static let apiKeyQueryText = "api_key=8216e974d625f2a458a739c20007dcd6"
         static let languageQueryText = "&language=ru-RU"
         static let pageQueryText = "&page=1"
@@ -38,7 +39,7 @@ final class ListMoviesViewController: UIViewController {
     private lazy var popularButton: UIButton = {
         let button = UIButton()
         button.setTitle(Constants.popularText, for: .normal)
-        button.backgroundColor = .systemPink
+        button.backgroundColor = UIColor(named: Constants.systemPinkColorName)
         button.layer.cornerRadius = 15
         button.addTarget(self, action: #selector(popularButtonAction), for: .touchUpInside)
         return button
@@ -47,7 +48,7 @@ final class ListMoviesViewController: UIViewController {
     private lazy var topRatedButton: UIButton = {
         let button = UIButton()
         button.setTitle(Constants.topRatedText, for: .normal)
-        button.backgroundColor = .systemPink
+        button.backgroundColor = UIColor(named: Constants.systemPinkColorName)
         button.layer.cornerRadius = 15
         button.addTarget(self, action: #selector(topRatedButtonAction), for: .touchUpInside)
         return button
@@ -56,7 +57,7 @@ final class ListMoviesViewController: UIViewController {
     private lazy var upComingButton: UIButton = {
         let button = UIButton()
         button.setTitle(Constants.upComingText, for: .normal)
-        button.backgroundColor = .systemPink
+        button.backgroundColor = UIColor(named: Constants.systemPinkColorName)
         button.layer.cornerRadius = 15
         button.addTarget(self, action: #selector(upComingButtonAction), for: .touchUpInside)
         return button
@@ -64,7 +65,7 @@ final class ListMoviesViewController: UIViewController {
 
     private let mainActivityIndicatorView: UIActivityIndicatorView = {
         let activity = UIActivityIndicatorView()
-        activity.color = .systemPink
+        activity.color = UIColor(named: Constants.systemPinkColorName)
         activity.startAnimating()
         return activity
     }()
@@ -279,7 +280,8 @@ extension ListMoviesViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let currentMovieViewController = CurrentMovieViewController()
-        navigationController?.pushViewController(currentMovieViewController, animated: true)
+        guard let safeMovies = movies, indexPath.row < safeMovies.count else { return }
+        let currentMovieViewController = CurrentMovieViewController(movie: safeMovies[indexPath.row])
+        navigationController?.pushViewController(currentMovieViewController, animated: false)
     }
 }
