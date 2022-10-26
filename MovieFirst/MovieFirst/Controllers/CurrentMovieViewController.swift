@@ -28,6 +28,13 @@ final class CurrentMovieViewController: UIViewController {
         return imageView
     }()
 
+    private let mainActivityIndicatorView: UIActivityIndicatorView = {
+        let activity = UIActivityIndicatorView()
+        activity.color = UIColor(named: Constants.systemPinkColorName)
+        activity.startAnimating()
+        return activity
+    }()
+
     private let titleMovieLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
@@ -159,6 +166,8 @@ final class CurrentMovieViewController: UIViewController {
         title = Constants.overviewText
         similarMovieCollectionView.delegate = self
         similarMovieCollectionView.dataSource = self
+        mainActivityIndicatorView.startAnimating()
+        mainActivityIndicatorView.isHidden = false
         navigationController?.navigationBar.tintColor = UIColor(named: Constants.systemPinkColorName)
         addSubview()
         setupConstraint()
@@ -178,6 +187,7 @@ final class CurrentMovieViewController: UIViewController {
         contentView.addSubview(overviewMovieLabel)
         contentView.addSubview(similarMovieLabel)
         contentView.addSubview(similarMovieCollectionView)
+        contentView.addSubview(mainActivityIndicatorView)
     }
 
     private func setupConstraint() {
@@ -194,6 +204,7 @@ final class CurrentMovieViewController: UIViewController {
         createSimilarMovieCollectionViewConstraint()
         createMainScrollViewConstraint()
         createContentViewConstraint()
+        createMainActivityIndicatorViewConstraint()
     }
 
     func getDataImageFromURLImage(posterPath: String) {
@@ -219,8 +230,6 @@ final class CurrentMovieViewController: UIViewController {
                     DispatchQueue.main.async {
                         self.similarMovieCollectionView.reloadData()
                     }
-                } else {
-                    print(error ?? "")
                 }
             }
             task.resume()
@@ -249,7 +258,6 @@ final class CurrentMovieViewController: UIViewController {
             guard let imageData = try? Data(contentsOf: imageMovieNameURL) else { continue }
             imagePosters.append(imageData)
         }
-        print(imagePosters)
     }
 
     private func createImageMovieImageViewConstraint() {
@@ -339,7 +347,14 @@ final class CurrentMovieViewController: UIViewController {
         NSLayoutConstraint.activate([
             similarMovieLabel.topAnchor.constraint(equalTo: overviewMovieLabel.bottomAnchor, constant: 20),
             similarMovieLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            similarMovieLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.9)
+        ])
+    }
+
+    private func createMainActivityIndicatorViewConstraint() {
+        mainActivityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            mainActivityIndicatorView.centerYAnchor.constraint(equalTo: similarMovieLabel.centerYAnchor),
+            mainActivityIndicatorView.leftAnchor.constraint(equalTo: similarMovieLabel.rightAnchor, constant: 10)
         ])
     }
 
@@ -382,6 +397,10 @@ extension CurrentMovieViewController: UICollectionViewDelegateFlowLayout {}
 
 extension CurrentMovieViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if imagePosters.count != 0 {
+            mainActivityIndicatorView.stopAnimating()
+            mainActivityIndicatorView.isHidden = true
+        }
         heightSimilarMovieCollectionView.constant =
             similarMovieCollectionView.frame.width * 2 / 3 * CGFloat(imagePosters.count / 2)
         heightSimilarMovieCollectionView.isActive = true
