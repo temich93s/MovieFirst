@@ -18,6 +18,7 @@ final class ListMoviesViewController: UIViewController {
 
     private enum Constants {
         static let systemPinkColorName = "SystemPinkColor"
+        static let systemLightGrayColorName = "SystemLightGrayColor"
         static let apiKeyQueryText = "api_key=8216e974d625f2a458a739c20007dcd6"
         static let languageQueryText = "&language=ru-RU"
         static let pageQueryText = "&page=1"
@@ -48,7 +49,7 @@ final class ListMoviesViewController: UIViewController {
     private lazy var topRatedButton: UIButton = {
         let button = UIButton()
         button.setTitle(Constants.topRatedText, for: .normal)
-        button.backgroundColor = UIColor(named: Constants.systemPinkColorName)
+        button.backgroundColor = UIColor(named: Constants.systemLightGrayColorName)
         button.layer.cornerRadius = 15
         button.addTarget(self, action: #selector(topRatedButtonAction), for: .touchUpInside)
         return button
@@ -57,7 +58,7 @@ final class ListMoviesViewController: UIViewController {
     private lazy var upComingButton: UIButton = {
         let button = UIButton()
         button.setTitle(Constants.upComingText, for: .normal)
-        button.backgroundColor = UIColor(named: Constants.systemPinkColorName)
+        button.backgroundColor = UIColor(named: Constants.systemLightGrayColorName)
         button.layer.cornerRadius = 15
         button.addTarget(self, action: #selector(upComingButtonAction), for: .touchUpInside)
         return button
@@ -84,6 +85,9 @@ final class ListMoviesViewController: UIViewController {
     // MARK: - Private Properties
 
     private var movies: [Movie]? = []
+
+    private lazy var buttons: [UIButton] = [popularButton, topRatedButton, upComingButton]
+
     private var currentCategoryMovies: CurrentCategoryMovies = .popular
 
     // MARK: - Lifecycle
@@ -98,6 +102,7 @@ final class ListMoviesViewController: UIViewController {
     @objc private func popularButtonAction() {
         mainActivityIndicatorView.startAnimating()
         mainActivityIndicatorView.isHidden = false
+        setupActiveButton(pressedButton: popularButton)
         currentCategoryMovies = .popular
         fetchData(categoryMovies: Constants.popularQueryText)
     }
@@ -105,6 +110,7 @@ final class ListMoviesViewController: UIViewController {
     @objc private func topRatedButtonAction() {
         mainActivityIndicatorView.startAnimating()
         mainActivityIndicatorView.isHidden = false
+        setupActiveButton(pressedButton: topRatedButton)
         currentCategoryMovies = .topRated
         fetchData(categoryMovies: Constants.topRatedQueryText)
     }
@@ -112,12 +118,12 @@ final class ListMoviesViewController: UIViewController {
     @objc private func upComingButtonAction() {
         mainActivityIndicatorView.startAnimating()
         mainActivityIndicatorView.isHidden = false
+        setupActiveButton(pressedButton: upComingButton)
         currentCategoryMovies = .upcoming
         fetchData(categoryMovies: Constants.upcomingQueryText)
     }
 
     @objc private func refreshAction() {
-        print(currentCategoryMovies)
         switch currentCategoryMovies {
         case .popular:
             fetchData(categoryMovies: Constants.popularQueryText)
@@ -150,7 +156,7 @@ final class ListMoviesViewController: UIViewController {
 
     private func setupRefreshControl() {
         refreshControl.addTarget(self, action: #selector(refreshAction), for: .valueChanged)
-        refreshControl.tintColor = UIColor.systemPink
+        refreshControl.tintColor = UIColor(named: Constants.systemPinkColorName)
     }
 
     private func setupConstraint() {
@@ -161,38 +167,45 @@ final class ListMoviesViewController: UIViewController {
         createMainActivityIndicatorViewConstraint()
     }
 
+    private func setupActiveButton(pressedButton: UIButton) {
+        for button in buttons {
+            button.backgroundColor = UIColor(named: Constants.systemLightGrayColorName)
+            guard button == pressedButton else { continue }
+            pressedButton.backgroundColor = UIColor(named: Constants.systemPinkColorName)
+        }
+    }
+
     private func fetchData(categoryMovies: String) {
         let urlString = Constants.themoviedbQueryText + categoryMovies + Constants
             .apiKeyQueryText + Constants.languageQueryText + Constants.pageQueryText + Constants.pageQueryText
-        if let url = URL(string: urlString) {
-            let session = URLSession(configuration: .default)
-            let task = session.dataTask(with: url) { [weak self] data, _, error in
-                guard let self = self else { return }
-                if error == nil {
-                    self.decodeData(data: data)
-                    self.getDataImageFromURLImage()
-                    DispatchQueue.main.async {
-                        self.mainActivityIndicatorView.stopAnimating()
-                        self.mainActivityIndicatorView.isHidden = true
-                        self.listMoviesTableView.reloadData()
-                    }
-                } else {
-                    print(error ?? "")
+        guard let url = URL(string: urlString) else { return }
+        let session = URLSession(configuration: .default)
+        let task = session.dataTask(with: url) { [weak self] data, _, error in
+            guard let self = self else { return }
+            if error == nil {
+                self.decodeData(data: data)
+                self.getDataImageFromURLImage()
+                DispatchQueue.main.async {
+                    self.mainActivityIndicatorView.stopAnimating()
+                    self.mainActivityIndicatorView.isHidden = true
+                    self.listMoviesTableView.reloadData()
                 }
+            } else {
+                guard let safeError = error else { return }
+                print(safeError)
             }
-            task.resume()
         }
+        task.resume()
     }
 
     func decodeData(data: Data?) {
         let decoder = JSONDecoder()
-        if let safeData = data {
-            do {
-                let decodedData = try decoder.decode(MovieList.self, from: safeData)
-                movies = decodedData.results
-            } catch {
-                print(error)
-            }
+        guard let safeData = data else { return }
+        do {
+            let decodedData = try decoder.decode(MovieList.self, from: safeData)
+            movies = decodedData.results
+        } catch {
+            print(error)
         }
     }
 

@@ -3,8 +3,9 @@
 
 import UIKit
 
-// MARK: - Экран с выбранным фильмом
+// MARK: - CurrentMovieViewController
 
+/// Экран с выбранным фильмом
 final class CurrentMovieViewController: UIViewController {
     // MARK: - Constants
 
@@ -111,7 +112,6 @@ final class CurrentMovieViewController: UIViewController {
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .gray
         collectionView.register(
             SimilarMovieCollectionViewCell.self,
             forCellWithReuseIdentifier: Constants.similarMovieCollectionViewCellText
@@ -129,8 +129,10 @@ final class CurrentMovieViewController: UIViewController {
 
     // MARK: - Private Properties
 
-    private var similarMovies: [Result]? = []
+    private var similarMovies: [SimilarMovie]? = []
+
     private var imagePosters: [Data] = []
+
     private lazy var heightSimilarMovieCollectionView = similarMovieCollectionView.heightAnchor
         .constraint(equalToConstant: 0)
 
@@ -139,7 +141,6 @@ final class CurrentMovieViewController: UIViewController {
     init(movie: Movie) {
         super.init(nibName: nil, bundle: nil)
         getDataImageFromURLImage(posterPath: movie.posterPath)
-
         titleMovieLabel.text = movie.title
         releaseDataValueLabel.text = movie.releaseDate
         voteAverageValueLabel.text = "\(movie.voteAverage)"
@@ -169,6 +170,11 @@ final class CurrentMovieViewController: UIViewController {
         mainActivityIndicatorView.startAnimating()
         mainActivityIndicatorView.isHidden = false
         navigationController?.navigationBar.tintColor = UIColor(named: Constants.systemPinkColorName)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .action,
+            target: self,
+            action: #selector(shareImageAction)
+        )
         addSubview()
         setupConstraint()
     }
@@ -207,7 +213,7 @@ final class CurrentMovieViewController: UIViewController {
         createMainActivityIndicatorViewConstraint()
     }
 
-    func getDataImageFromURLImage(posterPath: String) {
+    private func getDataImageFromURLImage(posterPath: String) {
         guard let imageMovieNameURL = URL(string: "\(Constants.posterPathQueryText)" + "\(posterPath)") else { return }
         DispatchQueue.global().async {
             guard let data = try? Data(contentsOf: imageMovieNameURL) else { return }
@@ -218,37 +224,34 @@ final class CurrentMovieViewController: UIViewController {
     }
 
     private func fetchSimilarMovies(idMovie: Int) {
-        let urlString = Constants.firstPartURLText + "\(idMovie)" + Constants
-            .secondPartURLText
-        if let url = URL(string: urlString) {
-            let session = URLSession(configuration: .default)
-            let task = session.dataTask(with: url) { [weak self] data, _, error in
-                guard let self = self else { return }
-                if error == nil {
-                    self.decodeData(data: data)
-                    self.getDataImageFromURLImage()
-                    DispatchQueue.main.async {
-                        self.similarMovieCollectionView.reloadData()
-                    }
+        let urlString = Constants.firstPartURLText + "\(idMovie)" + Constants.secondPartURLText
+        guard let url = URL(string: urlString) else { return }
+        let session = URLSession(configuration: .default)
+        let task = session.dataTask(with: url) { [weak self] data, _, error in
+            guard let self = self else { return }
+            if error == nil {
+                self.decodeData(data: data)
+                self.getDataImageFromURLImage()
+                DispatchQueue.main.async {
+                    self.similarMovieCollectionView.reloadData()
                 }
             }
-            task.resume()
         }
+        task.resume()
     }
 
-    func decodeData(data: Data?) {
+    private func decodeData(data: Data?) {
         let decoder = JSONDecoder()
-        if let safeData = data {
-            do {
-                let decodedData = try decoder.decode(SimilarMovies.self, from: safeData)
-                similarMovies = decodedData.results
-            } catch {
-                print(error)
-            }
+        guard let safeData = data else { return }
+        do {
+            let decodedData = try decoder.decode(SimilarMovies.self, from: safeData)
+            similarMovies = decodedData.results
+        } catch {
+            print(error)
         }
     }
 
-    func getDataImageFromURLImage() {
+    private func getDataImageFromURLImage() {
         guard let safeSimilarMovies = similarMovies else { return }
         for index in 0 ..< safeSimilarMovies.count {
             guard
@@ -258,6 +261,19 @@ final class CurrentMovieViewController: UIViewController {
             guard let imageData = try? Data(contentsOf: imageMovieNameURL) else { continue }
             imagePosters.append(imageData)
         }
+    }
+
+    @objc private func shareImageAction() {
+        startItemSharing(item: imageMovieImageView.image)
+    }
+
+    private func startItemSharing(item: Any?) {
+        guard let saveItem = item else { return }
+        let safeActivityVC = UIActivityViewController(
+            activityItems: [saveItem],
+            applicationActivities: nil
+        )
+        present(safeActivityVC, animated: true, completion: nil)
     }
 
     private func createImageMovieImageViewConstraint() {

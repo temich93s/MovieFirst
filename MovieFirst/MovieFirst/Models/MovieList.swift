@@ -3,7 +3,7 @@
 
 import Foundation
 
-// MARK: - Movie
+// MARK: - MovieList
 
 /// MovieList: список фильмов
 /// - page: номер страницы с набором фильмов

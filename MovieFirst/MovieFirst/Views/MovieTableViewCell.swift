@@ -3,13 +3,16 @@
 
 import UIKit
 
-// MARK: - Ячейка с фильмом
+// MARK: MovieTableViewCell
 
+/// Ячейка с фильмом
 final class MovieTableViewCell: UITableViewCell {
     // MARK: - Constants
 
     private enum Constants {
         static let systemPinkColorName = "SystemPinkColor"
+        static let systemWhiteColorName = "SystemWhiteColor"
+        static let systemLightGrayColorName = "SystemLightGrayColor"
     }
 
     // MARK: - Private Visual Properties
@@ -19,7 +22,7 @@ final class MovieTableViewCell: UITableViewCell {
         label.numberOfLines = 2
         label.textAlignment = .center
         label.font = UIFont.boldSystemFont(ofSize: 17)
-        label.textColor = .white
+        label.textColor = UIColor(named: Constants.systemWhiteColorName)
         label.backgroundColor = UIColor(named: Constants.systemPinkColorName)
         return label
     }()
@@ -28,7 +31,7 @@ final class MovieTableViewCell: UITableViewCell {
         let label = UILabel()
         label.numberOfLines = 7
         label.textAlignment = .center
-        label.backgroundColor = .lightGray
+        label.backgroundColor = UIColor(named: Constants.systemLightGrayColorName)
         label.font = UIFont.systemFont(ofSize: 15)
         return label
     }()
@@ -43,7 +46,7 @@ final class MovieTableViewCell: UITableViewCell {
     private let scoreMovieLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.textColor = .white
+        label.textColor = UIColor(named: Constants.systemWhiteColorName)
         label.backgroundColor = UIColor(named: Constants.systemPinkColorName)
         label.layer.cornerRadius = 10
         label.layer.masksToBounds = true
@@ -59,7 +62,7 @@ final class MovieTableViewCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = .lightGray
+        backgroundColor = UIColor(named: Constants.systemLightGrayColorName)
         selectionStyle = .none
         addSubview()
         setupConstraint()
