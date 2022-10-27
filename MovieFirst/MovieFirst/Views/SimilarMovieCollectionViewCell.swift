@@ -3,6 +3,9 @@
 
 import UIKit
 
+// MARK: - SimilarMovieCollectionViewCell
+
+/// Ячейка с похожим фильмом
 final class SimilarMovieCollectionViewCell: UICollectionViewCell {
     // MARK: - Private Visual Properties
 

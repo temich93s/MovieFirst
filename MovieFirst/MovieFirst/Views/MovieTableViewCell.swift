@@ -3,7 +3,7 @@
 
 import UIKit
 
-// MARK: MovieTableViewCell
+// MARK: - MovieTableViewCell
 
 /// Ячейка с фильмом
 final class MovieTableViewCell: UITableViewCell {

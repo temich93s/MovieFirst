@@ -3,8 +3,9 @@
 
 import UIKit
 
-// MARK: - Экран со списком фильмов
+// MARK: - ListMoviesViewController
 
+/// Экран со списком фильмов
 final class ListMoviesViewController: UIViewController {
     // MARK: - Enum
 
