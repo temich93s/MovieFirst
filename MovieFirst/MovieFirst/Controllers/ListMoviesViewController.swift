@@ -198,7 +198,7 @@ final class ListMoviesViewController: UIViewController {
         task.resume()
     }
 
-    func decodeData(data: Data?) {
+    private func decodeData(data: Data?) {
         let decoder = JSONDecoder()
         guard let safeData = data else { return }
         do {
@@ -209,7 +209,7 @@ final class ListMoviesViewController: UIViewController {
         }
     }
 
-    func getDataImageFromURLImage() {
+    private func getDataImageFromURLImage() {
         guard let safeMovies = movies else { return }
         for index in 0 ..< safeMovies.count {
             guard
