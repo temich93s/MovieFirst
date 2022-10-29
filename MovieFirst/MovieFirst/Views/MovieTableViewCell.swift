@@ -14,6 +14,7 @@ final class MovieTableViewCell: UITableViewCell {
         static let systemWhiteColorName = "SystemWhiteColor"
         static let systemLightGrayColorName = "SystemLightGrayColor"
         static let fatalErrorText = "init(coder:) has not been implemented"
+        static let posterPathQueryText = "https://image.tmdb.org/t/p/w500"
     }
 
     // MARK: - Private Visual Properties
@@ -78,8 +79,7 @@ final class MovieTableViewCell: UITableViewCell {
         descriptionMovieLabel.text = movie.overview
         dateMovieLabel.text = movie.releaseDate
         scoreMovieLabel.text = "\(movie.voteAverage)"
-        guard let safeDataImage = movie.dataImage else { return }
-        imageMovieImageView.image = UIImage(data: safeDataImage)
+        setupImageFromURLImage(posterPath: movie.posterPath)
     }
 
     // MARK: - Private Methods
@@ -89,6 +89,19 @@ final class MovieTableViewCell: UITableViewCell {
         selectionStyle = .none
         addSubview()
         setupConstraint()
+    }
+
+    private func setupImageFromURLImage(posterPath: String) {
+        guard let imageMovieNameURL =
+            URL(string: "\(Constants.posterPathQueryText)\(posterPath)")
+        else { return }
+        DispatchQueue.global().async {
+            let data = try? Data(contentsOf: imageMovieNameURL)
+            DispatchQueue.main.async {
+                guard let safeData = data else { return }
+                self.imageMovieImageView.image = UIImage(data: safeData)
+            }
+        }
     }
 
     private func addSubview() {
