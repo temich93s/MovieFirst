@@ -182,7 +182,6 @@ final class ListMoviesViewController: UIViewController {
         let task = URLSession.shared.dataTask(with: url) { data, _, error in
             if error == nil {
                 self.decodeData(data: data)
-                self.getDataImageFromURLImage()
                 DispatchQueue.main.async {
                     self.mainActivityIndicatorView.stopAnimating()
                     self.mainActivityIndicatorView.isHidden = true
@@ -204,17 +203,6 @@ final class ListMoviesViewController: UIViewController {
             movies = decodedData.movies
         } catch {
             print(error)
-        }
-    }
-
-    private func getDataImageFromURLImage() {
-        guard let safeMovies = movies else { return }
-        for index in 0 ..< safeMovies.count {
-            guard
-                let imageMovieNameURL =
-                URL(string: "\(Constants.posterPathQueryText)\(safeMovies[index].posterPath)")
-            else { continue }
-            movies?[index].dataImage = try? Data(contentsOf: imageMovieNameURL)
         }
     }
 

@@ -35,7 +35,6 @@ struct MovieList: Codable {
 /// - title: наименование фильма
 /// - voteAverage: оценка фильма
 struct Movie: Codable {
-    var dataImage: Data?
     let id: Int
     let overview: String
     let posterPath: String
@@ -45,7 +44,6 @@ struct Movie: Codable {
     let voteCount: Double
 
     enum CodingKeys: String, CodingKey {
-        case dataImage
         case id
         case overview
         case posterPath = "poster_path"

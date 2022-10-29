@@ -15,6 +15,7 @@ final class MovieTableViewCell: UITableViewCell {
         static let systemLightGrayColorName = "SystemLightGrayColor"
         static let fatalErrorText = "init(coder:) has not been implemented"
         static let posterPathQueryText = "https://image.tmdb.org/t/p/w500"
+        static let placeholderImageText = "PlaceholderImage"
     }
 
     // MARK: - Private Visual Properties
@@ -92,6 +93,7 @@ final class MovieTableViewCell: UITableViewCell {
     }
 
     private func setupImageFromURLImage(posterPath: String) {
+        imageMovieImageView.image = UIImage(named: Constants.placeholderImageText)
         guard let imageMovieNameURL =
             URL(string: "\(Constants.posterPathQueryText)\(posterPath)")
         else { return }
