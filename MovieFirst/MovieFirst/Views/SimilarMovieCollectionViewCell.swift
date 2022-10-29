@@ -7,6 +7,12 @@ import UIKit
 
 /// Ячейка с похожим фильмом
 final class SimilarMovieCollectionViewCell: UICollectionViewCell {
+    // MARK: - Constants
+
+    private enum Constants {
+        static let fatalErrorText = "init(coder:) has not been implemented"
+    }
+
     // MARK: - Private Visual Properties
 
     private let imageMovieImageView: UIImageView = {
@@ -18,13 +24,12 @@ final class SimilarMovieCollectionViewCell: UICollectionViewCell {
 
     override init(frame: CGRect) {
         super.init(frame: .zero)
-        contentView.addSubview(imageMovieImageView)
-        createImageMovieImageViewConstraint()
+        initView()
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError(Constants.fatalErrorText)
     }
 
     // MARK: - Public Methods
@@ -34,6 +39,11 @@ final class SimilarMovieCollectionViewCell: UICollectionViewCell {
     }
 
     // MARK: - Private Methods
+
+    private func initView() {
+        contentView.addSubview(imageMovieImageView)
+        createImageMovieImageViewConstraint()
+    }
 
     private func createImageMovieImageViewConstraint() {
         imageMovieImageView.translatesAutoresizingMaskIntoConstraints = false

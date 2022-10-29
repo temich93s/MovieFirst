@@ -43,7 +43,8 @@ final class ListMoviesViewController: UIViewController {
         button.setTitle(Constants.popularText, for: .normal)
         button.backgroundColor = UIColor(named: Constants.systemPinkColorName)
         button.layer.cornerRadius = 15
-        button.addTarget(self, action: #selector(popularButtonAction), for: .touchUpInside)
+        button.tag = 0
+        button.addTarget(self, action: #selector(catedoryButtonAction(sender:)), for: .touchUpInside)
         return button
     }()
 
@@ -52,7 +53,8 @@ final class ListMoviesViewController: UIViewController {
         button.setTitle(Constants.topRatedText, for: .normal)
         button.backgroundColor = UIColor(named: Constants.systemLightGrayColorName)
         button.layer.cornerRadius = 15
-        button.addTarget(self, action: #selector(topRatedButtonAction), for: .touchUpInside)
+        button.tag = 1
+        button.addTarget(self, action: #selector(catedoryButtonAction(sender:)), for: .touchUpInside)
         return button
     }()
 
@@ -61,7 +63,8 @@ final class ListMoviesViewController: UIViewController {
         button.setTitle(Constants.upComingText, for: .normal)
         button.backgroundColor = UIColor(named: Constants.systemLightGrayColorName)
         button.layer.cornerRadius = 15
-        button.addTarget(self, action: #selector(upComingButtonAction), for: .touchUpInside)
+        button.tag = 2
+        button.addTarget(self, action: #selector(catedoryButtonAction(sender:)), for: .touchUpInside)
         return button
     }()
 
@@ -100,28 +103,23 @@ final class ListMoviesViewController: UIViewController {
 
     // MARK: - Private Methods
 
-    @objc private func popularButtonAction() {
+    @objc private func catedoryButtonAction(sender: UIButton) {
         mainActivityIndicatorView.startAnimating()
         mainActivityIndicatorView.isHidden = false
-        setupActiveButton(pressedButton: popularButton)
-        currentCategoryMovies = .popular
-        fetchData(categoryMovies: Constants.popularQueryText)
-    }
-
-    @objc private func topRatedButtonAction() {
-        mainActivityIndicatorView.startAnimating()
-        mainActivityIndicatorView.isHidden = false
-        setupActiveButton(pressedButton: topRatedButton)
-        currentCategoryMovies = .topRated
-        fetchData(categoryMovies: Constants.topRatedQueryText)
-    }
-
-    @objc private func upComingButtonAction() {
-        mainActivityIndicatorView.startAnimating()
-        mainActivityIndicatorView.isHidden = false
-        setupActiveButton(pressedButton: upComingButton)
-        currentCategoryMovies = .upcoming
-        fetchData(categoryMovies: Constants.upcomingQueryText)
+        setupActiveButton(pressedButton: sender)
+        switch sender.tag {
+        case 0:
+            currentCategoryMovies = .popular
+            fetchData(categoryMovies: Constants.popularQueryText)
+        case 1:
+            currentCategoryMovies = .topRated
+            fetchData(categoryMovies: Constants.topRatedQueryText)
+        case 2:
+            currentCategoryMovies = .upcoming
+            fetchData(categoryMovies: Constants.upcomingQueryText)
+        default:
+            break
+        }
     }
 
     @objc private func refreshAction() {
@@ -177,12 +175,11 @@ final class ListMoviesViewController: UIViewController {
     }
 
     private func fetchData(categoryMovies: String) {
-        let urlString = Constants.themoviedbQueryText + categoryMovies + Constants
-            .apiKeyQueryText + Constants.languageQueryText + Constants.pageQueryText + Constants.pageQueryText
+        let urlString =
+            "\(Constants.themoviedbQueryText)\(categoryMovies)\(Constants.apiKeyQueryText)" +
+            "\(Constants.languageQueryText)\(Constants.pageQueryText)\(Constants.pageQueryText)"
         guard let url = URL(string: urlString) else { return }
-        let session = URLSession(configuration: .default)
-        let task = session.dataTask(with: url) { [weak self] data, _, error in
-            guard let self = self else { return }
+        let task = URLSession.shared.dataTask(with: url) { data, _, error in
             if error == nil {
                 self.decodeData(data: data)
                 self.getDataImageFromURLImage()
@@ -204,7 +201,7 @@ final class ListMoviesViewController: UIViewController {
         guard let safeData = data else { return }
         do {
             let decodedData = try decoder.decode(MovieList.self, from: safeData)
-            movies = decodedData.results
+            movies = decodedData.movies
         } catch {
             print(error)
         }
@@ -215,7 +212,7 @@ final class ListMoviesViewController: UIViewController {
         for index in 0 ..< safeMovies.count {
             guard
                 let imageMovieNameURL =
-                URL(string: "\(Constants.posterPathQueryText)" + "\(safeMovies[index].posterPath)")
+                URL(string: "\(Constants.posterPathQueryText)\(safeMovies[index].posterPath)")
             else { continue }
             movies?[index].dataImage = try? Data(contentsOf: imageMovieNameURL)
         }
@@ -283,13 +280,7 @@ extension ListMoviesViewController: UITableViewDelegate, UITableViewDataSource {
             .dequeueReusableCell(withIdentifier: Constants.movieTableViewCellText) as? MovieTableViewCell,
             let safeMovies = movies
         else { return UITableViewCell() }
-        cell.configureMovieTableViewCell(
-            dataImage: safeMovies[indexPath.row].dataImage,
-            nameMovie: safeMovies[indexPath.row].title,
-            descriptionMovie: safeMovies[indexPath.row].overview,
-            dateMovie: safeMovies[indexPath.row].releaseDate,
-            scoreMovie: "\(safeMovies[indexPath.row].voteAverage)"
-        )
+        cell.configureMovieTableViewCell(movie: safeMovies[indexPath.row])
         return cell
     }
 

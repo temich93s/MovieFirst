@@ -20,14 +20,12 @@ final class CurrentMovieViewController: UIViewController {
         static let voteCountLabelText = "Голоса:"
         static let similarMovieLabelText = "Похожие фильмы"
         static let similarMovieCollectionViewCellText = "SimilarMovieCollectionViewCell"
+        static let fatalErrorText = "init(coder:) has not been implemented"
     }
 
     // MARK: - Private Visual Properties
 
-    private let imageMovieImageView: UIImageView = {
-        let imageView = UIImageView()
-        return imageView
-    }()
+    private let imageMovieImageView = UIImageView()
 
     private let mainActivityIndicatorView: UIActivityIndicatorView = {
         let activity = UIActivityIndicatorView()
@@ -140,18 +138,12 @@ final class CurrentMovieViewController: UIViewController {
 
     init(movie: Movie) {
         super.init(nibName: nil, bundle: nil)
-        getDataImageFromURLImage(posterPath: movie.posterPath)
-        titleMovieLabel.text = movie.title
-        releaseDataValueLabel.text = movie.releaseDate
-        voteAverageValueLabel.text = "\(movie.voteAverage)"
-        voteCountValueLabel.text = "\(movie.voteCount)"
-        overviewMovieLabel.text = movie.overview
-        fetchSimilarMovies(idMovie: movie.id)
+        initView(movie: movie)
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError(Constants.fatalErrorText)
     }
 
     // MARK: - Lifecycle
@@ -162,6 +154,16 @@ final class CurrentMovieViewController: UIViewController {
     }
 
     // MARK: - Private Methods
+
+    private func initView(movie: Movie) {
+        getDataImageFromURLImage(posterPath: movie.posterPath)
+        titleMovieLabel.text = movie.title
+        releaseDataValueLabel.text = movie.releaseDate
+        voteAverageValueLabel.text = "\(movie.voteAverage)"
+        voteCountValueLabel.text = "\(movie.voteCount)"
+        overviewMovieLabel.text = movie.overview
+        fetchSimilarMovies(idMovie: movie.id)
+    }
 
     private func setupView() {
         title = Constants.overviewText
@@ -214,7 +216,7 @@ final class CurrentMovieViewController: UIViewController {
     }
 
     private func getDataImageFromURLImage(posterPath: String) {
-        guard let imageMovieNameURL = URL(string: "\(Constants.posterPathQueryText)" + "\(posterPath)") else { return }
+        guard let imageMovieNameURL = URL(string: "\(Constants.posterPathQueryText)\(posterPath)") else { return }
         DispatchQueue.global().async {
             guard let data = try? Data(contentsOf: imageMovieNameURL) else { return }
             DispatchQueue.main.async {
@@ -224,11 +226,9 @@ final class CurrentMovieViewController: UIViewController {
     }
 
     private func fetchSimilarMovies(idMovie: Int) {
-        let urlString = Constants.firstPartURLText + "\(idMovie)" + Constants.secondPartURLText
+        let urlString = "\(Constants.firstPartURLText)\(idMovie)\(Constants.secondPartURLText)"
         guard let url = URL(string: urlString) else { return }
-        let session = URLSession(configuration: .default)
-        let task = session.dataTask(with: url) { [weak self] data, _, error in
-            guard let self = self else { return }
+        let task = URLSession.shared.dataTask(with: url) { data, _, error in
             if error == nil {
                 self.decodeData(data: data)
                 self.getDataImageFromURLImage()
@@ -256,9 +256,9 @@ final class CurrentMovieViewController: UIViewController {
         for index in 0 ..< safeSimilarMovies.count {
             guard
                 let imageMovieNameURL =
-                URL(string: "\(Constants.posterPathQueryText)" + "\(safeSimilarMovies[index].posterPath)")
+                URL(string: "\(Constants.posterPathQueryText)\(safeSimilarMovies[index].posterPath)"),
+                let imageData = try? Data(contentsOf: imageMovieNameURL)
             else { continue }
-            guard let imageData = try? Data(contentsOf: imageMovieNameURL) else { continue }
             imagePosters.append(imageData)
         }
     }

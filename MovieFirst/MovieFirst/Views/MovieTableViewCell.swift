@@ -13,6 +13,7 @@ final class MovieTableViewCell: UITableViewCell {
         static let systemPinkColorName = "SystemPinkColor"
         static let systemWhiteColorName = "SystemWhiteColor"
         static let systemLightGrayColorName = "SystemLightGrayColor"
+        static let fatalErrorText = "init(coder:) has not been implemented"
     }
 
     // MARK: - Private Visual Properties
@@ -62,35 +63,33 @@ final class MovieTableViewCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        initView()
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError(Constants.fatalErrorText)
+    }
+
+    // MARK: - Public Methods
+
+    func configureMovieTableViewCell(movie: Movie) {
+        nameMovieLabel.text = movie.title
+        descriptionMovieLabel.text = movie.overview
+        dateMovieLabel.text = movie.releaseDate
+        scoreMovieLabel.text = "\(movie.voteAverage)"
+        guard let safeDataImage = movie.dataImage else { return }
+        imageMovieImageView.image = UIImage(data: safeDataImage)
+    }
+
+    // MARK: - Private Methods
+
+    private func initView() {
         backgroundColor = UIColor(named: Constants.systemLightGrayColorName)
         selectionStyle = .none
         addSubview()
         setupConstraint()
     }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    // MARK: - Public Methods
-
-    func configureMovieTableViewCell(
-        dataImage: Data?,
-        nameMovie: String?,
-        descriptionMovie: String?,
-        dateMovie: String?,
-        scoreMovie: String?
-    ) {
-        nameMovieLabel.text = nameMovie
-        descriptionMovieLabel.text = descriptionMovie
-        dateMovieLabel.text = dateMovie
-        scoreMovieLabel.text = scoreMovie
-        guard let safeDataImage = dataImage else { return }
-        imageMovieImageView.image = UIImage(data: safeDataImage)
-    }
-
-    // MARK: - Private Methods
 
     private func addSubview() {
         addSubview(nameMovieLabel)
